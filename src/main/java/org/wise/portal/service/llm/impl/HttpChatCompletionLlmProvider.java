@@ -55,18 +55,17 @@ public class HttpChatCompletionLlmProvider implements LlmProvider {
 			connection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
 			connection.setRequestProperty("Accept-Charset", "UTF-8");
 			connection.setDoOutput(true);
-			OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream());
-			writer.write(requestBody);
-			writer.flush();
-			writer.close();
-			BufferedReader br = new BufferedReader(
-			    new InputStreamReader(connection.getInputStream(), "UTF-8"));
-			String line;
-			StringBuilder response = new StringBuilder();
-			while ((line = br.readLine()) != null) {
-				response.append(line);
+			try (OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream())) {
+				writer.write(requestBody);
 			}
-			br.close();
+			StringBuilder response = new StringBuilder();
+			try (BufferedReader br = new BufferedReader(
+			    new InputStreamReader(connection.getInputStream(), "UTF-8"))) {
+				String line;
+				while ((line = br.readLine()) != null) {
+					response.append(line);
+				}
+			}
 			return response.toString();
 		} catch (IOException e) {
 			throw new RuntimeException("Chat request failed for LLM provider: " + name, e);
