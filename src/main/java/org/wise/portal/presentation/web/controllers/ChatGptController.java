@@ -11,6 +11,15 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.wise.portal.service.llm.LlmProvider;
 
+/**
+ * REST endpoint that forwards chat-completion requests to the OpenAI LLM provider.
+ *
+ * <p>The actual HTTP call is delegated to the {@link LlmProvider} abstraction. The
+ * {@code openai.chat.api.url} property may point to any OpenAI-compatible endpoint,
+ * including local gateways such as Ollama or vLLM.
+ *
+ * @see org.wise.portal.service.llm.LlmProviderConfig
+ */
 @RestController
 @RequestMapping("/api/chat-gpt")
 public class ChatGptController {

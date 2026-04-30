@@ -11,6 +11,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.wise.portal.service.llm.LlmProvider;
 
+/**
+ * REST endpoint that forwards chat-completion requests to the AWS Bedrock LLM provider.
+ *
+ * <p>The actual HTTP call is delegated to the {@link LlmProvider} abstraction, keeping
+ * this controller free of provider-specific details. To switch or extend the underlying
+ * AI backend, register a different {@link LlmProvider} bean named {@code "bedrockLlmProvider"}
+ * in {@link org.wise.portal.service.llm.LlmProviderConfig}.
+ */
 @RestController
 @RequestMapping("/api/aws-bedrock/chat")
 public class AWSBedrockController {
