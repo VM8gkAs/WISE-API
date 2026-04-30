@@ -10,32 +10,29 @@ import java.net.URL;
 import org.wise.portal.service.llm.LlmProvider;
 
 /**
- * {@link LlmProvider} implementation for any OpenAI-compatible chat-completion endpoint.
+ * {@link LlmProvider} implementation that sends chat-completion requests over HTTP
+ * using a Bearer-token Authorization header.
  *
- * <p>This single class covers:
- * <ul>
- *   <li>The real OpenAI API ({@code https://api.openai.com/v1/chat/completions})</li>
- *   <li>AWS Bedrock's OpenAI-compatible runtime endpoint</li>
- *   <li>Local OpenAI-compatible gateways such as Ollama, vLLM, LM Studio, or LocalAI</li>
- * </ul>
+ * <p>Works with any endpoint that accepts OpenAI-compatible chat-completion requests,
+ * including AWS Bedrock's runtime endpoint and the OpenAI API.
  *
  * <p>Instances are created by {@link org.wise.portal.service.llm.LlmProviderConfig}
  * and injected into controllers by name.
  *
  * @author WISE Contributors
  */
-public class OpenAiCompatibleLlmProvider implements LlmProvider {
+public class HttpChatCompletionLlmProvider implements LlmProvider {
 
 	private final String name;
 	private final String apiKey;
 	private final String chatApiUrl;
 
 	/**
-	 * @param name       short provider identifier used in logs and routing (e.g. {@code "openai"})
-	 * @param apiKey     bearer token / API key sent in the {@code Authorization} header
+	 * @param name       short provider identifier used in logs (e.g. {@code "aws-bedrock"})
+	 * @param apiKey     bearer token sent in the {@code Authorization} header
 	 * @param chatApiUrl full URL of the chat-completion endpoint
 	 */
-	public OpenAiCompatibleLlmProvider(String name, String apiKey, String chatApiUrl) {
+	public HttpChatCompletionLlmProvider(String name, String apiKey, String chatApiUrl) {
 		this.name = name;
 		this.apiKey = apiKey;
 		this.chatApiUrl = chatApiUrl;
@@ -47,7 +44,8 @@ public class OpenAiCompatibleLlmProvider implements LlmProvider {
 			throw new RuntimeException("API key is not configured for LLM provider: " + name);
 		}
 		if (chatApiUrl == null || chatApiUrl.isEmpty()) {
-			throw new RuntimeException("Chat API URL is not configured for LLM provider: " + name);
+			throw new RuntimeException(
+			    "Chat API URL is not configured for LLM provider: " + name);
 		}
 		try {
 			URL url = new URL(chatApiUrl);
@@ -57,18 +55,17 @@ public class OpenAiCompatibleLlmProvider implements LlmProvider {
 			connection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
 			connection.setRequestProperty("Accept-Charset", "UTF-8");
 			connection.setDoOutput(true);
-			OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream());
-			writer.write(requestBody);
-			writer.flush();
-			writer.close();
-			BufferedReader br = new BufferedReader(
-			    new InputStreamReader(connection.getInputStream(), "UTF-8"));
-			String line;
-			StringBuilder response = new StringBuilder();
-			while ((line = br.readLine()) != null) {
-				response.append(line);
+			try (OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream())) {
+				writer.write(requestBody);
 			}
-			br.close();
+			StringBuilder response = new StringBuilder();
+			try (BufferedReader br = new BufferedReader(
+			    new InputStreamReader(connection.getInputStream(), "UTF-8"))) {
+				String line;
+				while ((line = br.readLine()) != null) {
+					response.append(line);
+				}
+			}
 			return response.toString();
 		} catch (IOException e) {
 			throw new RuntimeException("Chat request failed for LLM provider: " + name, e);
