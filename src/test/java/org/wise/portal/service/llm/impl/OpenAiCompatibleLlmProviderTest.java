@@ -1,7 +1,8 @@
 package org.wise.portal.service.llm.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 import org.wise.portal.service.llm.LlmProvider;
@@ -29,25 +30,31 @@ public class OpenAiCompatibleLlmProviderTest {
 	public void chat_MissingApiKey_ThrowsRuntimeException() {
 		LlmProvider provider = new OpenAiCompatibleLlmProvider("openai", "",
 		    "https://api.openai.com/v1/chat/completions");
-		assertThrows(RuntimeException.class, () -> provider.chat("{}"));
+		RuntimeException ex = assertThrows(RuntimeException.class, () -> provider.chat("{}"));
+		assertTrue(ex.getMessage().contains("API key is not configured for LLM provider: openai"));
 	}
 
 	@Test
 	public void chat_NullApiKey_ThrowsRuntimeException() {
 		LlmProvider provider = new OpenAiCompatibleLlmProvider("openai", null,
 		    "https://api.openai.com/v1/chat/completions");
-		assertThrows(RuntimeException.class, () -> provider.chat("{}"));
+		RuntimeException ex = assertThrows(RuntimeException.class, () -> provider.chat("{}"));
+		assertTrue(ex.getMessage().contains("API key is not configured for LLM provider: openai"));
 	}
 
 	@Test
 	public void chat_MissingChatApiUrl_ThrowsRuntimeException() {
 		LlmProvider provider = new OpenAiCompatibleLlmProvider("aws-bedrock", "test-key", "");
-		assertThrows(RuntimeException.class, () -> provider.chat("{}"));
+		RuntimeException ex = assertThrows(RuntimeException.class, () -> provider.chat("{}"));
+		assertTrue(
+		    ex.getMessage().contains("Chat API URL is not configured for LLM provider: aws-bedrock"));
 	}
 
 	@Test
 	public void chat_NullChatApiUrl_ThrowsRuntimeException() {
 		LlmProvider provider = new OpenAiCompatibleLlmProvider("aws-bedrock", "test-key", null);
-		assertThrows(RuntimeException.class, () -> provider.chat("{}"));
+		RuntimeException ex = assertThrows(RuntimeException.class, () -> provider.chat("{}"));
+		assertTrue(
+		    ex.getMessage().contains("Chat API URL is not configured for LLM provider: aws-bedrock"));
 	}
 }
