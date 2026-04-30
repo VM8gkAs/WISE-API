@@ -64,7 +64,7 @@ public class OpenAiCompatibleLlmProvider implements LlmProvider {
 			BufferedReader br = new BufferedReader(
 			    new InputStreamReader(connection.getInputStream(), "UTF-8"));
 			String line;
-			StringBuffer response = new StringBuffer();
+			StringBuilder response = new StringBuilder();
 			while ((line = br.readLine()) != null) {
 				response.append(line);
 			}

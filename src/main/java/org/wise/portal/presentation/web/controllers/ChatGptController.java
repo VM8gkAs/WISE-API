@@ -3,6 +3,7 @@ package org.wise.portal.presentation.web.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,7 +30,7 @@ public class ChatGptController {
 
 	@ResponseBody
 	@Secured("ROLE_USER")
-	@PostMapping
+	@PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 	protected String sendChatMessage(@RequestBody String body) {
 		return llmProvider.chat(body);
 	}
